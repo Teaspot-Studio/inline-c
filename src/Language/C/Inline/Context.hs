@@ -37,6 +37,7 @@ module Language.C.Inline.Context
   , baseCtx
   , fptrCtx
   , funCtx
+  , funConstCtx
   , vecCtx
   , VecCtx(..)
   , bsCtx
@@ -352,6 +353,29 @@ funPtrAntiQuoter = AntiQuoter
             |]
           return (hsTy, hsExp')
         _ -> fail "The `fun' marshaller captures function pointers only"
+  }
+
+-- | Version of @funCtx@ that doesn't delete function pointer after usage. 
+-- That is usefull when C function stores the function pointer somewhere for later usage.
+funConstCtx :: Context
+funConstCtx = mempty
+  { ctxAntiQuoters = Map.fromList [("funConst", SomeAntiQuoter funConstPtrAntiQuoter)]
+  }
+
+funConstPtrAntiQuoter :: AntiQuoter HaskellIdentifier
+funConstPtrAntiQuoter = AntiQuoter
+  { aqParser = cDeclAqParser
+  , aqMarshaller = \purity cTypes cTy cId -> do
+      hsTy <- convertType_ "funConstCtx" purity cTypes cTy
+      hsExp <- getHsVariable "funConstCtx" cId
+      case hsTy of
+        TH.AppT (TH.ConT n) hsTy' | n == ''FunPtr -> do
+          hsExp' <- [| \cont -> do
+              funPtr <- $(mkFunPtr (return hsTy')) $(return hsExp)
+              cont funPtr
+            |]
+          return (hsTy, hsExp')
+        _ -> fail "The `funConst' marshaller captures function pointers only"
   }
 
 -- | This 'Context' includes two 'AntiQuoter's that allow to easily use

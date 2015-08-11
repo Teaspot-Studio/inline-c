@@ -27,6 +27,7 @@ module Language.C.Inline
   , baseCtx
   , fptrCtx
   , funCtx
+  , funConstCtx
   , vecCtx
   , bsCtx
   , context
