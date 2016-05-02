@@ -283,8 +283,9 @@ getHsVariable :: String -> HaskellIdentifier -> TH.ExpQ
 getHsVariable err s = do
   mbHsName <- TH.lookupValueName $ unHaskellIdentifier s
   case mbHsName of
-    Nothing -> fail $ "Cannot capture Haskell variable " ++ unHaskellIdentifier s ++
-                      ", because it's not in scope. (" ++ err ++ ")"
+    -- Nothing -> fail $ "Cannot capture Haskell variable " ++ unHaskellIdentifier s ++
+    --                   ", because it's not in scope. (" ++ err ++ ")"
+    Nothing -> TH.varE $ TH.mkName $ unHaskellIdentifier s
     Just hsName -> TH.varE hsName
 
 convertType_ :: String -> Purity -> TypesTable -> C.Type C.CIdentifier -> TH.Q TH.Type
