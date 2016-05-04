@@ -280,7 +280,7 @@ typeNamesFromTypesTable cTypes = HashSet.fromList
 -- Useful contexts
 
 getHsVariable :: String -> HaskellIdentifier -> TH.ExpQ
-getHsVariable err s = do
+getHsVariable _ s = do
   mbHsName <- TH.lookupValueName $ unHaskellIdentifier s
   case mbHsName of
     -- Nothing -> fail $ "Cannot capture Haskell variable " ++ unHaskellIdentifier s ++
